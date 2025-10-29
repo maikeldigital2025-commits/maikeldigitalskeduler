@@ -1,11 +1,114 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>React App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maikel AI Scheduler</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .scheduler-container {
+      background: #fff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 24px;
+      color: #333;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    input, button {
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      background: #ffcc00;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #e6b800;
+    }
+    .message {
+      text-align: center;
+      margin-top: 16px;
+      font-weight: bold;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+
+<div class="scheduler-container">
+  <h1>AI Scheduler</h1>
+  <form id="schedulerForm">
+    <input type="text" id="name" placeholder="Your Name" required>
+    <input type="email" id="email" placeholder="Your Email" required>
+    <input type="date" id="date" required>
+    <input type="time" id="time" required>
+    <button type="submit">Schedule</button>
+  </form>
+  <div class="message" id="message"></div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+  const SUPABASE_URL = 'https://lgyqhhzoznenxtxzdate.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ...'; // Use your full anon key
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const form = document.getElementById('schedulerForm');
+  const messageDiv = document.getElementById('message');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const date = document.getElementById('date').value;
+    const time = document.getElementById('time').value;
+
+    if (!name || !email || !date || !time) {
+      messageDiv.textContent = 'Please fill all fields.';
+      messageDiv.style.color = 'red';
+      return;
+    }
+
+    const { data, error } = await supabase.from('scheduler').insert([
+      { name, email, date, time }
+    ]);
+
+    if (error) {
+      messageDiv.textContent = 'Error scheduling. Try again!';
+      messageDiv.style.color = 'red';
+      console.error(error);
+    } else {
+      messageDiv.textContent = 'Scheduled successfully! 🎉';
+      messageDiv.style.color = 'green';
+      form.reset();
+    }
+  });
+</script>
+
+</body>
 </html>
