@@ -1,12 +1,18 @@
 // netlifyActions.js
 export async function runAutomation(endpoint, payload) {
   try {
-    // Call Netlify Function
-    const response = await fetch(`/.netlify/functions/${endpoint}`, {
+    const response = await fetch(`/api/${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
+    return await response.json();
+  } catch (err) {
+    console.error('Automation error:', err);
+    return { success: false, message: err.message };
+  }
+}
+;
 
     const result = await response.json();
     if (!result.success) {
