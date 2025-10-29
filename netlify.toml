@@ -1,4 +1,3 @@
-// Placeholder for netlify.toml
 # netlify.toml for Maikel Digital Scheduler
 [build]
   command = "npm install && npm run build && npm run export"
