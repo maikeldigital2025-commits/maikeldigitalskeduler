@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Maikel AI Scheduler Login</title>
+  <title>Maikel OnlineJobs Login</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -40,13 +40,19 @@
     button:hover {
       background: #357ae8;
     }
+    .message {
+      margin-top: 16px;
+      font-weight: bold;
+      color: red;
+    }
   </style>
 </head>
 <body>
 
 <div class="login-container">
-  <h1>Welcome to Maikel AI Scheduler</h1>
+  <h1>Welcome to Maikel OnlineJobs</h1>
   <button id="googleLogin">Login with Google</button>
+  <div class="message" id="message"></div>
 </div>
 
 <script type="module">
@@ -56,23 +62,29 @@
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ...'; // your anon key
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+  const messageDiv = document.getElementById('message');
   const loginButton = document.getElementById('googleLogin');
 
+  // Auto redirect if already logged in
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) window.location.href = '/dashboard.html';
+
+  // Google login button
   loginButton.addEventListener('click', async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: window.location.origin + '/dashboard.html'
       }
     });
-    if (error) console.error('Login error:', error.message);
+    if (error) {
+      messageDiv.textContent = 'Login failed: ' + error.message;
+    }
   });
 
-  // Auto redirect if already logged in
+  // Optional: listen to auth state changes
   supabase.auth.onAuthStateChange((event, session) => {
-    if (session) {
-      window.location.href = '/dashboard.html';
-    }
+    if (session) window.location.href = '/dashboard.html';
   });
 </script>
 
