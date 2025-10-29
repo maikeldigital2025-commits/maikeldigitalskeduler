@@ -1,7 +1,6 @@
-# netlify.toml for Maikel Digital Scheduler
 [build]
-  command = "npm install && npm run build && npm run export"
-  publish = "out"
+  command = "npm install && npm run build"
+  publish = "build"
 
 [[redirects]]
   from = "/*"
