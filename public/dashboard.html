@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maikel OnlineJobs Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 24px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    input, textarea, select, button {
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      background: #ffcc00;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #e6b800;
+    }
+    .message {
+      text-align: center;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>OnlineJobs Dashboard</h1>
+
+  <!-- Job Search Form -->
+  <form id="searchForm">
+    <h2>Search Jobs</h2>
+    <input type="text" id="searchKeywords" placeholder="Keywords (e.g., PHP, VA)" required>
+    <input type="text" id="searchLocation" placeholder="Location (optional)">
+    <select id="searchType">
+      <option value="fulltime">Full-Time</option>
+      <option value="parttime">Part-Time</option>
+      <option value="freelance">Freelance</option>
+    </select>
+    <button type="submit">Search Jobs</button>
+    <div class="message" id="searchMessage"></div>
+  </form>
+
+  <!-- Job Posting Form -->
+  <form id="postForm">
+    <h2>Post a Job</h2>
+    <input type="text" id="jobTitle" placeholder="Job Title" required>
+    <textarea id="jobDescription" placeholder="Job Description" rows="4" required></textarea>
+    <input type="text" id="jobSkills" placeholder="Required Skills (comma separated)" required>
+    <input type="number" id="jobRate" placeholder="Rate (per hour)" required>
+    <button type="submit">Post Job</button>
+    <div class="message" id="postMessage"></div>
+  </form>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+  const SUPABASE_URL = 'https://lgyqhhzoznenxtxzdate.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ...'; // your anon key
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Redirect to login if not authenticated
+  const session = await supabase.auth.getSession();
+  if (!session.data.session) {
+    window.location.href = '/index.html';
+  }
+
+  // Job Search Form Submission
+  const searchForm = document.getElementById('searchForm');
+  const searchMessage = document.getElementById('searchMessage');
+
+  searchForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const keywords = document.getElementById('searchKeywords').value.trim();
+    const location = document.getElementById('searchLocation').value.trim();
+    const type = document.getElementById('searchType').value;
+
+    // Save search query to Supabase
+    const { data, error } = await supabase.from('job_searches').insert([
+      { keywords, location, type }
+    ]);
+
+    if (error) {
+      searchMessage.textContent = 'Error saving search query!';
+      searchMessage.style.color = 'red';
+      console.error(error);
+    } else {
+      searchMessage.textContent = 'Search saved! (Automation placeholder)';
+      searchMessage.style.color = 'green';
+      searchForm.reset();
+    }
+  });
+
+  // Job Post Form Submission
+  const postForm = document.getElementById('postForm');
+  const postMessage = document.getElementById('postMessage');
+
+  postForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('jobTitle').value.trim();
+    const description = document.getElementById('jobDescription').value.trim();
+    const skills = document.getElementById('jobSkills').value.trim();
+    const rate = parseFloat(document.getElementById('jobRate').value);
+
+    // Save job post to Supabase
+    const { data, error } = await supabase.from('job_posts').insert([
+      { title, description, skills, rate }
+    ]);
+
+    if (error) {
+      postMessage.textContent = 'Error saving job post!';
+      postMessage.style.color = 'red';
+      console.error(error);
+    } else {
+      postMessage.textContent = 'Job post saved! (Automation placeholder)';
+      postMessage.style.color = 'green';
+      postForm.reset();
+    }
+  });
+</script>
+
+</body>
+</html>
