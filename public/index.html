@@ -1,34 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maikel OnlineJobs Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .login-container {
+      background: #fff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+    }
+    h1 {
+      margin-bottom: 24px;
+      color: #333;
+    }
+    button {
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: none;
+      background: #4285F4;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #357ae8;
+    }
+    .message {
+      margin-top: 16px;
+      font-weight: bold;
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-container">
+  <h1>Welcome to Maikel OnlineJobs</h1>
+  <button id="googleLogin">Login with Google</button>
+  <div class="message" id="message"></div>
+</div>
+
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
 (async () => {
   const SUPABASE_URL = 'https://lgyqhhzoznenxtxzdate.supabase.co';
-  const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
+  const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY'; // replace with your anon key
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   const loginButton = document.getElementById('googleLogin');
   const messageDiv = document.getElementById('message');
 
   // Check if already logged in
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session) {
-    window.location.href = '/dashboard.html';
-    return;
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      window.location.href = '/dashboard.html';
+      return;
+    }
+  } catch (err) {
+    console.error('Session check error:', err);
   }
 
-  // Login button click
+  // Login button
   loginButton.addEventListener('click', async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin }
-    });
-    if (error) messageDiv.textContent = 'Login failed: ' + error.message;
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin } // root domain only
+      });
+      if (error) messageDiv.textContent = 'Login failed: ' + error.message;
+    } catch (err) {
+      messageDiv.textContent = 'Login error: ' + err.message;
+      console.error(err);
+    }
   });
 
-  // Auth state change listener
+  // Listen to auth changes (after redirect)
   supabase.auth.onAuthStateChange((event, session) => {
     if (session) window.location.href = '/dashboard.html';
   });
 
 })();
 </script>
+
+</body>
+</html>
